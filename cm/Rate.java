@@ -13,7 +13,7 @@ public class Rate {
 
     public Rate(CarParkKind kind, ArrayList<Period> reducedPeriods, ArrayList<Period> normalPeriods, BigDecimal normalRate, BigDecimal reducedRate) {
         if (reducedPeriods == null || normalPeriods == null) {
-            throw new IllegalArgumentException("periods cannot be null");
+            throw new IllegalArgumentException("Periods cannot be null");
         }
         if (normalRate == null || reducedRate == null) {
             throw new IllegalArgumentException("The rates cannot be null");
@@ -24,11 +24,15 @@ public class Rate {
         if (normalRate.compareTo(reducedRate) <= 0) {
             throw new IllegalArgumentException("The normal rate cannot be less or equal to the reduced rate");
         }
+        // Fix: Ensure both rates are less than or equal to 10
+        if (normalRate.compareTo(BigDecimal.TEN) > 0 || reducedRate.compareTo(BigDecimal.TEN) > 0) {
+            throw new IllegalArgumentException("Rates cannot exceed 10");
+        }
         if (!isValidPeriods(reducedPeriods) || !isValidPeriods(normalPeriods)) {
             throw new IllegalArgumentException("The periods are not valid individually");
         }
         if (!isValidPeriods(reducedPeriods, normalPeriods)) {
-            throw new IllegalArgumentException("The periods overlaps");
+            throw new IllegalArgumentException("The periods overlap");
         }
         this.kind = kind;
         this.hourlyNormalRate = normalRate;
@@ -36,6 +40,7 @@ public class Rate {
         this.reduced = reducedPeriods;
         this.normal = normalPeriods;
     }
+
 
     /**
      * Checks if two collections of periods are valid together
@@ -88,6 +93,11 @@ public class Rate {
         return isValid;
     }
     public BigDecimal calculate(Period periodStay) {
+        // Fix: Before performing any operations on periodStay, the method checks if it is null
+        // to ensure that the exception type matches the expected one in the test case.
+        if (periodStay == null) {
+            throw new IllegalArgumentException("PeriodStay cannot be null");
+        }
         int normalRateHours = periodStay.occurences(normal);
         int reducedRateHours = periodStay.occurences(reduced);
         if (this.kind==CarParkKind.VISITOR) return BigDecimal.valueOf(0);
